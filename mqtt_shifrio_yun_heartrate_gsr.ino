@@ -5,18 +5,22 @@
 BridgeClient net;
 MQTTClient client;
 
+//heart rate
 unsigned long lastMillis = 0;
 long currentInterrupt = millis();
 long lastInterrupt = millis();
+long currentInterval = 0;
 int prevCount = 0;
 int counter = 0;
 
 unsigned long temp[10];
 int index = 0;
 
+//gsr
 const int GSR = A0;
 int gsrSensorValue = 0;
 int gsrAverage = 0;
+long gsrtimer = millis();
 
 
 
@@ -56,29 +60,57 @@ void loop() {
     float rate = 60000 / avg;
     //client.publish("/hello", "world");
     //client.publish("/velo", "moto");
-    String topic = "/rate";
+    String topic = "/pulse";
     String payload = "";
     payload += rate;
-    digitalWrite(LED_BUILTIN, HIGH);
+    //digitalWrite(LED_BUILTIN, HIGH);
     client.publish(topic, payload);
 
-    delay(100);
+    //publish pulse and interval
+    topic = "/pulse/interval";
+    payload = "";
+    payload += rate;
+    payload += ",";
+    payload += currentInterval;
+    client.publish(topic, payload);
+
+    //publish interval only
+    topic = "/interval";
+    payload = "";
+    payload += currentInterval;
+    client.publish(topic, payload);
+
+
+    //blink
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(10);
     digitalWrite(LED_BUILTIN, LOW);
 
   }
 
-  //gsr specific code
-  long gsrSum = 0;
-  for (int i = 0; i < 10; i++)    //Average the 10 measurements to remove the glitch
-  {
-    gsrSensorValue = analogRead(GSR);
-    gsrSum += gsrSensorValue;
-    delay(5);
+
+  //send gsr every two secods
+  if (millis() - gsrtimer > 2000) {
+    gsrtimer = millis();
+    //gsr specific code
+    long gsrSum = 0;
+    for (int i = 0; i < 10; i++)    //Average the 10 measurements to remove the glitch
+    {
+      gsrSensorValue = analogRead(GSR);
+      gsrSum += gsrSensorValue;
+      delay(5);
+    }
+    gsrAverage = gsrSum / 10;
+    String gsrTopic = "/gsr";
+    String gsrPayload = "";
+    gsrPayload += gsrAverage;
+    client.publish(gsrTopic, gsrPayload);
+
+    //blink
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(10);
+    digitalWrite(LED_BUILTIN, LOW);
   }
-  gsrAverage = gsrSum / 10;
-  String gsrTopic = "/gsr"
-  String gsrPayload = "";
-  gsrPayload += gsrAverage;
 
 
 }
@@ -91,6 +123,7 @@ void interrupt()
   currentInterrupt = millis();
   long diff = currentInterrupt - lastInterrupt;
   temp[index] = diff;
+  currentInterval = diff;
   index++;
   if (index >= 10) {
     index = 0;
