@@ -11,7 +11,7 @@ long lastInterrupt = millis();
 int prevCount = 0;
 int counter = 0;
 
-unsigned long temp[5];
+unsigned long temp[10];
 int index = 0;
 
 const int GSR = A0;
@@ -49,7 +49,7 @@ void loop() {
     prevCount = counter;
 
     float sum = 0;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
       sum += temp[i];
     }
     float avg = sum / 5.0;
@@ -92,7 +92,7 @@ void interrupt()
   long diff = currentInterrupt - lastInterrupt;
   temp[index] = diff;
   index++;
-  if (index >= 5) {
+  if (index >= 10) {
     index = 0;
   }
   counter++;
@@ -101,7 +101,7 @@ void interrupt()
 /*Function: Initialization for the array(temp)*/
 void arrayInit()
 {
-  for (int i = 0; i < 5; i++)
+  for (int i = 0; i < 10; i++)
   {
     temp[i] = 0;
   }
