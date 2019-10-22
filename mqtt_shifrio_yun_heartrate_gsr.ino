@@ -14,6 +14,11 @@ int counter = 0;
 unsigned long temp[5];
 int index = 0;
 
+const int GSR = A0;
+int gsrSensorValue = 0;
+int gsrAverage = 0;
+
+
 
 void connect() {
   while (!client.connect("arduino-yun-vizinviz", "ecf929fe", "f65bde19d8e46d67")) {
@@ -40,15 +45,15 @@ void loop() {
   }
 
   // publish a message roughly every second.
-  if (prevCount!=counter) {
+  if (prevCount != counter) {
     prevCount = counter;
 
     float sum = 0;
-    for(int i=0; i<5; i++){
-      sum+=temp[i];
+    for (int i = 0; i < 5; i++) {
+      sum += temp[i];
     }
-    float avg = sum/5.0;
-    float rate = 60000/avg;
+    float avg = sum / 5.0;
+    float rate = 60000 / avg;
     //client.publish("/hello", "world");
     //client.publish("/velo", "moto");
     String topic = "/rate";
@@ -62,6 +67,19 @@ void loop() {
 
   }
 
+  //gsr specific code
+  long gsrSum = 0;
+  for (int i = 0; i < 10; i++)    //Average the 10 measurements to remove the glitch
+  {
+    gsrSensorValue = analogRead(GSR);
+    gsrSum += gsrSensorValue;
+    delay(5);
+  }
+  gsrAverage = gsrSum / 10;
+  String gsrTopic = "/gsr"
+  String gsrPayload = "";
+  gsrPayload += gsrAverage;
+
 
 }
 
@@ -74,7 +92,7 @@ void interrupt()
   long diff = currentInterrupt - lastInterrupt;
   temp[index] = diff;
   index++;
-  if(index>=5){
+  if (index >= 5) {
     index = 0;
   }
   counter++;
