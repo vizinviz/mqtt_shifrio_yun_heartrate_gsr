@@ -90,7 +90,7 @@ void loop() {
 
 
   //send gsr every two secods
-  if (millis() - gsrtimer > 2000) {
+  if (millis() - gsrtimer > 1000) {
     gsrtimer = millis();
     //gsr specific code
     long gsrSum = 0;
