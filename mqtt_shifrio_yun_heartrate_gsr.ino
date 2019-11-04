@@ -12,6 +12,8 @@ long lastInterrupt = millis();
 long currentInterval = 0;
 int prevCount = 0;
 int counter = 0;
+long pulsetimer = millis();
+int currentRate = 0;
 
 unsigned long temp[10];
 int index = 0;
@@ -48,7 +50,7 @@ void loop() {
     connect();
   }
 
-  // publish a message roughly every second.
+  //calc new rate
   if (prevCount != counter) {
     prevCount = counter;
 
@@ -57,28 +59,32 @@ void loop() {
       sum += temp[i];
     }
     float avg = sum / 10.0;
-    int rate = round(60000 / avg); 
+    currentRate = round(60000 / avg);
     //client.publish("/hello", "world");
     //client.publish("/velo", "moto");
+  }
+
+  if (millis() - pulsetimer > 1000) {
+    pulsetimer = millis();
     String topic = "/pulse";
     String payload = "";
-//    payload += rate;
-//    //digitalWrite(LED_BUILTIN, HIGH);
-//    client.publish(topic, payload);
+    //    payload += rate;
+    //    //digitalWrite(LED_BUILTIN, HIGH);
+    //    client.publish(topic, payload);
 
     //publish pulse and interval
     topic = "/pulse/interval";
     payload = "";
-    payload += rate;
+    payload += currentRate;
     payload += ",";
     payload += currentInterval;
     client.publish(topic, payload);
 
     //publish interval only
-//    topic = "/interval";
-//    payload = "";
-//    payload += currentInterval;
-//    client.publish(topic, payload);
+    //    topic = "/interval";
+    //    payload = "";
+    //    payload += currentInterval;
+    //    client.publish(topic, payload);
 
 
     //blink
