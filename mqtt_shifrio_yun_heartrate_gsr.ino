@@ -56,15 +56,15 @@ void loop() {
     for (int i = 0; i < 10; i++) {
       sum += temp[i];
     }
-    float avg = sum / 5.0;
-    float rate = 60000 / avg;
+    float avg = sum / 10.0;
+    int rate = round(60000 / avg); 
     //client.publish("/hello", "world");
     //client.publish("/velo", "moto");
     String topic = "/pulse";
     String payload = "";
-    payload += rate;
-    //digitalWrite(LED_BUILTIN, HIGH);
-    client.publish(topic, payload);
+//    payload += rate;
+//    //digitalWrite(LED_BUILTIN, HIGH);
+//    client.publish(topic, payload);
 
     //publish pulse and interval
     topic = "/pulse/interval";
@@ -75,10 +75,10 @@ void loop() {
     client.publish(topic, payload);
 
     //publish interval only
-    topic = "/interval";
-    payload = "";
-    payload += currentInterval;
-    client.publish(topic, payload);
+//    topic = "/interval";
+//    payload = "";
+//    payload += currentInterval;
+//    client.publish(topic, payload);
 
 
     //blink
